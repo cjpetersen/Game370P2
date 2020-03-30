@@ -121,4 +121,35 @@ public class Prisoner : MonoBehaviour
 				break;
 		}
 	}
+
+	void Eyes()
+	{
+		void Eyes()
+		{
+			RaycastHit hit;
+			float distance = 15f;
+			float angle = 78;
+			float segments = angle - 1;
+			Vector3 startPos = transform.position + (Vector3.up * 2);
+			Vector3 targetPos = new Vector3();
+			float startAngle = -angle * .5f;
+			float finishAngle = angle * .5f;
+			float increment = angle / segments;
+
+			for (float i = startAngle; i < finishAngle; i += increment)
+			{
+				targetPos = (Quaternion.Euler(0, i, 0) * transform.forward).normalized * distance;
+
+				if (Physics.Raycast(startPos, targetPos, out hit, distance))
+				{
+					if (hit.collider.gameObject.tag == "Guard")
+					{
+						//Do something to make them move away
+						Debug.Log("REEEE");
+					}
+				}
+				Debug.DrawRay(startPos, targetPos, Color.red);
+			}
+		}
+	}
 }
