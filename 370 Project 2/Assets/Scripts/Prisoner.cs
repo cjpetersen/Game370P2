@@ -63,11 +63,17 @@ public class Prisoner : MonoBehaviour
 					Stats(1, 50);
 					Debug.Log(name + " is going to go eat.");
 				}
-				else
+				else if (fatigue <= 50)
 				{
 					move.SetDestination(GameObject.Find(recreation).transform.position);
 					Stats(3, 25);
 					Debug.Log(name + " is going to the " + recreation);
+				}
+				else
+				{
+					move.SetDestination(GameObject.Find(cell).transform.position);
+					Stats(3, -25);
+					Debug.Log(name + " is going to rest in " + cell);
 				}
 				break;
 			case 9:

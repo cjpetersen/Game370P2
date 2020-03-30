@@ -8,7 +8,6 @@ public class Manager : MonoBehaviour
 	public static Manager m { get; private set; }
 
 	public List<string> recRooms;
-	public List<GameObject> rooms;
 	public List<GameObject> prisoners;
 	public List<string> names;
 
@@ -38,7 +37,10 @@ public class Manager : MonoBehaviour
 		GameObject[] temp = GameObject.FindGameObjectsWithTag("Prisoner");
 		for (int i = 0; i < temp.Length; i++)
 		{
-			temp[i].GetComponent<Prisoner>().cell = "Cell " + (i + 1).ToString();
+			if(i < 10)
+				temp[i].GetComponent<Prisoner>().cell = "Cell0" + (i + 1).ToString();
+			else
+				temp[i].GetComponent<Prisoner>().cell = "Cell" + (i + 1).ToString();
 			temp[i].name = names[Random.Range(0, names.Count)];
 			prisoners.Add(temp[i]);
 		}
