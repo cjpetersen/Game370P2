@@ -14,8 +14,17 @@ public class Prisoner : MonoBehaviour
 	public int exhaustion;
 
 	[Header("Personality")]
-	public string recreation;
+	public string rec1;
+	public string rec2;
+	public string rec3;
 	public int guardTrust;
+
+	[Header("Desires")]
+	public float foodDesire;
+	public float rec1Desire;
+	public float rec2Desire;
+	public float rec3Desire;
+	public float restDesire;
 
 	[Header("Room Information")]
 	public bool roomCheck = false;
@@ -25,7 +34,9 @@ public class Prisoner : MonoBehaviour
 	void Start()
 	{
 		#region Randomized starting stats
-		recreation = Manager.m.recRooms[Random.Range(0, Manager.m.recRooms.Count)];
+		rec1 = Manager.m.recRooms[Random.Range(0, Manager.m.recRooms.Count)];
+		do { rec2 = Manager.m.recRooms[Random.Range(0, Manager.m.recRooms.Count)]; } while (rec2 == rec1);
+		do { rec3 = Manager.m.recRooms[Random.Range(0, Manager.m.recRooms.Count)]; } while (rec3 == rec1);
 		hunger = Random.Range(50, 101);
 		sleep = Random.Range(50, 101);
 		fatigue = Random.Range(0, 51);
@@ -42,21 +53,17 @@ public class Prisoner : MonoBehaviour
 
 	public void RoomCheck()
 	{
-		int time = Manager.m.hour;
-
 		roomCheck = false;
 		Stats(-5, -5, 0, 0);
 
-		switch (time)
+		switch (Manager.m.hour)
 		{
 			case int t when (t <= 6 || t >= 22):
 				if (currentRoom != cell)
 					move.SetDestination(GameObject.Find(cell).transform.position);
 				Stats(0, 10, -10, -10);
 				break;
-			case 7:
-				break;
-			case int t when (t == 8 || t == 12 || t == 17):
+			case int t when (t == 7 || t == 12 || t == 17):
 				if (hunger < 50)
 				{
 					move.SetDestination(GameObject.Find("Cafeteria").transform.position);
@@ -65,9 +72,9 @@ public class Prisoner : MonoBehaviour
 				}
 				else if (fatigue <= 50)
 				{
-					move.SetDestination(GameObject.Find(recreation).transform.position);
+					move.SetDestination(GameObject.Find(rec1).transform.position);
 					Stats(3, 25);
-					Debug.Log(name + " is going to the " + recreation);
+					Debug.Log(name + " is going to the " + rec1);
 				}
 				else
 				{
@@ -76,19 +83,11 @@ public class Prisoner : MonoBehaviour
 					Debug.Log(name + " is going to rest in " + cell);
 				}
 				break;
-			case 9:
+			case int t when (t >= 8 && t <= 11):
+				//recreational time
 				break;
-			case 10:
-				break;
-			case 11:
-				break;
-			case 13:
-				break;
-			case 14:
-				break;
-			case 15:
-				break;
-			case 16:
+			case int t when (t >= 13 && t <= 16):
+				//labor time
 				break;
 			case 18:
 				break;
@@ -101,12 +100,12 @@ public class Prisoner : MonoBehaviour
 		}
 	}
 
-	private void Desires(int desire)
+	private float Desires(int desire)
 	{
 		/*Desire Chart
-		 * 0 = 
-		 * 1 = 
-		 * 2 = 
+		 * 0 = Food
+		 * 1 = Recreation
+		 * 2 = Sleep/Rest
 		 * 3 = 
 		 * 4 = 
 		 * 5 = 
@@ -115,16 +114,18 @@ public class Prisoner : MonoBehaviour
 		 * 8 = 
 		 * 9 = 
 		 */
+
+		float total = 0;
 		switch (desire)
 		{
 			case 0:
-				//code here
+				//based on hunger, rest
 				break;
 			case 1:
-				//code here
+				//based on fatigue, exhaustion
 				break;
 			case 2:
-				//code here
+				//based on fatigue, exhaution, rest
 				break;
 			case 3:
 				//code here
@@ -148,6 +149,8 @@ public class Prisoner : MonoBehaviour
 				//code here
 				break;
 		}
+
+		return total;
 	}
 
 	private void Stats(int hunger, int rest, int fatigue, int exhaustion)
@@ -156,6 +159,8 @@ public class Prisoner : MonoBehaviour
 		this.sleep += rest;
 		this.fatigue += fatigue;
 		this.exhaustion += exhaustion;
+
+		StatMinMax();
 	}
 
 	private void Stats(int stat, int magnitude)
@@ -175,6 +180,31 @@ public class Prisoner : MonoBehaviour
 				exhaustion += magnitude;
 				break;
 		}
+
+		StatMinMax();
+	}
+
+	private void StatMinMax()
+	{
+		if (hunger > 100)
+			hunger = 100;
+		else if (hunger < 0)
+			hunger = 0;
+
+		if (sleep > 100)
+			sleep = 100;
+		else if (sleep < 0)
+			sleep = 0;
+
+		if (fatigue > 100)
+			fatigue = 100;
+		else if (fatigue < 0)
+			fatigue = 0;
+
+		if (exhaustion > 100)
+			exhaustion = 100;
+		else if (exhaustion < 0)
+			exhaustion = 0;
 	}
 
 	void Eyes()
