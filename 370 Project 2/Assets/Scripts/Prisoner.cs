@@ -101,6 +101,55 @@ public class Prisoner : MonoBehaviour
 		}
 	}
 
+	private void Desires(int desire)
+	{
+		/*Desire Chart
+		 * 0 = 
+		 * 1 = 
+		 * 2 = 
+		 * 3 = 
+		 * 4 = 
+		 * 5 = 
+		 * 6 = 
+		 * 7 = 
+		 * 8 = 
+		 * 9 = 
+		 */
+		switch (desire)
+		{
+			case 0:
+				//code here
+				break;
+			case 1:
+				//code here
+				break;
+			case 2:
+				//code here
+				break;
+			case 3:
+				//code here
+				break;
+			case 4:
+				//code here
+				break;
+			case 5:
+				//code here
+				break;
+			case 6:
+				//code here
+				break;
+			case 7:
+				//code here
+				break;
+			case 8:
+				//code here
+				break;
+			case 9:
+				//code here
+				break;
+		}
+	}
+
 	private void Stats(int hunger, int rest, int fatigue, int exhaustion)
 	{
 		this.hunger += hunger;
