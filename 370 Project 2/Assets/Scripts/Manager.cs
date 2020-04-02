@@ -9,7 +9,8 @@ public class Manager : MonoBehaviour
 
 	public List<string> recRooms;
 	public List<GameObject> prisoners;
-	public List<string> names;
+	public List<string> firstNames;
+	public List<string> lastNames;
 
 	[Header("Time Cycle")]
 	public float hourLength;
@@ -18,6 +19,8 @@ public class Manager : MonoBehaviour
 	public int day;
 	public int month;
 	public int year;
+
+	public GameObject[] temp;
 
 	void Awake()
 	{
@@ -34,14 +37,16 @@ public class Manager : MonoBehaviour
 
 	void Start()
 	{
-		GameObject[] temp = GameObject.FindGameObjectsWithTag("Prisoner");
+		temp = GameObject.FindGameObjectsWithTag("Prisoner");
 		for (int i = 0; i < temp.Length; i++)
 		{
 			if(i < 10)
 				temp[i].GetComponent<Prisoner>().cell = "Cell0" + (i + 1).ToString();
 			else
 				temp[i].GetComponent<Prisoner>().cell = "Cell" + (i + 1).ToString();
-			temp[i].name = names[Random.Range(0, names.Count)];
+			temp[i].name = firstNames[Random.Range(0, firstNames.Count)];
+			temp[i].name += " " + (char)(Random.Range(0, 26) + 65) + ". ";
+			temp[i].name += lastNames[Random.Range(0, lastNames.Count)];
 			prisoners.Add(temp[i]);
 		}
 	}

@@ -36,13 +36,15 @@ public class Prisoner : MonoBehaviour
 		#region Randomized starting stats
 		rec1 = Manager.m.recRooms[Random.Range(0, Manager.m.recRooms.Count)];
 		do { rec2 = Manager.m.recRooms[Random.Range(0, Manager.m.recRooms.Count)]; } while (rec2 == rec1);
-		do { rec3 = Manager.m.recRooms[Random.Range(0, Manager.m.recRooms.Count)]; } while (rec3 == rec1);
+		do { rec3 = Manager.m.recRooms[Random.Range(0, Manager.m.recRooms.Count)]; } while (rec3 == rec1 || rec3 == rec2);
 		hunger = Random.Range(50, 101);
 		sleep = Random.Range(50, 101);
 		fatigue = Random.Range(0, 51);
 		exhaustion = Random.Range(0, 51);
 		guardTrust = Random.Range(0, 101);
 		#endregion
+
+		//Eyes();
 	}
 
 	void Update()
@@ -209,32 +211,29 @@ public class Prisoner : MonoBehaviour
 
 	void Eyes()
 	{
-		void Eyes()
+		RaycastHit hit;
+		float distance = 15f;
+		float angle = 78;
+		float segments = angle - 1;
+		Vector3 startPos = transform.position + (Vector3.up * 2);
+		Vector3 targetPos = new Vector3();
+		float startAngle = -angle * .5f;
+		float finishAngle = angle * .5f;
+		float increment = angle / segments;
+
+		for (float i = startAngle; i < finishAngle; i += increment)
 		{
-			RaycastHit hit;
-			float distance = 15f;
-			float angle = 78;
-			float segments = angle - 1;
-			Vector3 startPos = transform.position + (Vector3.up * 2);
-			Vector3 targetPos = new Vector3();
-			float startAngle = -angle * .5f;
-			float finishAngle = angle * .5f;
-			float increment = angle / segments;
+			targetPos = (Quaternion.Euler(0, i, 0) * transform.forward).normalized * distance;
 
-			for (float i = startAngle; i < finishAngle; i += increment)
+			if (Physics.Raycast(startPos, targetPos, out hit, distance))
 			{
-				targetPos = (Quaternion.Euler(0, i, 0) * transform.forward).normalized * distance;
-
-				if (Physics.Raycast(startPos, targetPos, out hit, distance))
+				if (hit.collider.gameObject.tag == "Guard")
 				{
-					if (hit.collider.gameObject.tag == "Guard")
-					{
-						//Do something to make them move away
-						Debug.Log("REEEE");
-					}
+					//Do something to make them move away
+					Debug.Log("REEEE");
 				}
-				Debug.DrawRay(startPos, targetPos, Color.red);
 			}
+			Debug.DrawRay(startPos, targetPos, Color.red);
 		}
 	}
 }
