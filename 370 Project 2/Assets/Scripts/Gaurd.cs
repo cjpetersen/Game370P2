@@ -186,7 +186,7 @@ public class Gaurd : MonoBehaviour
 		float angle = 78;
 		float segments = angle - 1;
 		Vector3 startPos = transform.position + (Vector3.up * 2);
-		Vector3 targetPos = new Vector3();
+		Vector3 targetPos;
 		float startAngle = -angle * .5f;
 		float finishAngle = angle * .5f;
 		float increment = angle / segments;

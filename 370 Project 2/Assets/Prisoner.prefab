@@ -54,10 +54,17 @@ MonoBehaviour:
   hunger: 0
   sleep: 0
   fatigue: 0
-  exhaustion: 0
-  recreation: 
+  rec1: 
+  rec2: 
+  rec3: 
+  labor: 
   guardTrust: 0
-  roomCheck: 0
+  foodDesire: 0
+  restDesire: 0
+  rec1Desire: 0
+  rec2Desire: 0
+  rec3Desire: 0
+  checkSchedule: 0
   cell: 
   currentRoom: 
 --- !u!33 &2198846527403773909
@@ -167,8 +174,8 @@ Animator:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2198846527403773865}
   m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
+  m_Avatar: {fileID: 9000000, guid: ecaebb88b9dd9ec4ba037ddd49f0c810, type: 3}
+  m_Controller: {fileID: 9100000, guid: 4ad7559e798db344c981b31c84a745dc, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0

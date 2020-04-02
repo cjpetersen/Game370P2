@@ -3253,7 +3253,7 @@ Transform:
   - {fileID: 596250495}
   - {fileID: 804266162}
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &877899009
 PrefabInstance:
@@ -3761,6 +3761,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6815066667165028246, guid: 68da09d595c66ff48bf550a415391ea7,
+        type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 4ad7559e798db344c981b31c84a745dc, type: 2}
+    - target: {fileID: 6815066667165028246, guid: 68da09d595c66ff48bf550a415391ea7,
+        type: 3}
+      propertyPath: m_Avatar
+      value: 
+      objectReference: {fileID: 9000000, guid: ecaebb88b9dd9ec4ba037ddd49f0c810, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 68da09d595c66ff48bf550a415391ea7, type: 3}
 --- !u!4 &1047356302 stripped
@@ -5037,7 +5047,7 @@ Transform:
   - {fileID: 242556616}
   - {fileID: 735709567}
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1567712522
 GameObject:
@@ -6596,22 +6606,58 @@ MonoBehaviour:
   - Library
   - Gym
   - Yard
+  labors:
+  - Laundry
+  - Rocks
   prisoners: []
   firstNames:
-  - Frank
-  - Al
-  - Bill
-  - Thomas
-  - Jim
+  - Jeffery
+  - Charles
+  - Theodore
+  - Arnold
+  - Walter
+  - Brad
+  - Clyde
+  - Michael
+  - Jose
+  - Caleb
+  - Billy
+  - Ivan
+  - Kevin
+  - Franky
+  - Evin
+  - Spencer
+  - Lewie
+  - Randy
+  - Oliver
+  - Ace
   lastNames:
-  - McArthur
+  - Dahmer
+  - Manson
+  - Bundy
+  - Miller
+  - White
+  - Smith
+  - Anderson
+  - Davis
+  - Rodriguez
+  - Gonzalez
+  - Russo
+  - Ivanov
+  - Wang
+  - Wilson
+  - Yang
+  - Hopkins
+  - Griffith
+  - Cash
+  - Beck
+  - Roger
   hourLength: 5
   timer: 0
   hour: 0
   day: 0
   month: 0
   year: 0
-  temp: []
 --- !u!4 &2140524319
 Transform:
   m_ObjectHideFlags: 0

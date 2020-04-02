@@ -11,23 +11,23 @@ public class Prisoner : MonoBehaviour
 	public int hunger;
 	public int sleep;
 	public int fatigue;
-	public int exhaustion;
 
 	[Header("Personality")]
 	public string rec1;
 	public string rec2;
 	public string rec3;
+	public string labor;
 	public int guardTrust;
 
 	[Header("Desires")]
 	public float foodDesire;
+	public float restDesire;
 	public float rec1Desire;
 	public float rec2Desire;
 	public float rec3Desire;
-	public float restDesire;
 
 	[Header("Room Information")]
-	public bool roomCheck = false;
+	public bool checkSchedule = false;
 	public string cell;
 	public string currentRoom;
 
@@ -37,10 +37,10 @@ public class Prisoner : MonoBehaviour
 		rec1 = Manager.m.recRooms[Random.Range(0, Manager.m.recRooms.Count)];
 		do { rec2 = Manager.m.recRooms[Random.Range(0, Manager.m.recRooms.Count)]; } while (rec2 == rec1);
 		do { rec3 = Manager.m.recRooms[Random.Range(0, Manager.m.recRooms.Count)]; } while (rec3 == rec1 || rec3 == rec2);
+		labor = Manager.m.labors[Random.Range(0, Manager.m.labors.Count)];
 		hunger = Random.Range(50, 101);
 		sleep = Random.Range(50, 101);
 		fatigue = Random.Range(0, 51);
-		exhaustion = Random.Range(0, 51);
 		guardTrust = Random.Range(0, 101);
 		#endregion
 
@@ -49,57 +49,70 @@ public class Prisoner : MonoBehaviour
 
 	void Update()
 	{
-		if (roomCheck)
-			RoomCheck();
+		if (checkSchedule)
+			CheckSchedule();
 	}
 
-	public void RoomCheck()
+	public void CheckSchedule()
 	{
-		roomCheck = false;
-		Stats(-5, -5, 0, 0);
+		checkSchedule = false;
+		Stats(-5, -5, 0);
 
 		switch (Manager.m.hour)
 		{
 			case int t when (t <= 6 || t >= 22):
 				if (currentRoom != cell)
 					move.SetDestination(GameObject.Find(cell).transform.position);
-				Stats(0, 10, -10, -10);
+				Stats(0, 10, -10);
 				break;
 			case int t when (t == 7 || t == 12 || t == 17):
-				if (hunger < 50)
+				if (Desires(0) >= Desires(1) && Desires(0) >= Desires(2))
 				{
 					move.SetDestination(GameObject.Find("Cafeteria").transform.position);
 					Stats(1, 50);
 					Debug.Log(name + " is going to go eat.");
 				}
-				else if (fatigue <= 50)
-				{
-					move.SetDestination(GameObject.Find(rec1).transform.position);
-					Stats(3, 25);
-					Debug.Log(name + " is going to the " + rec1);
-				}
+				else if (Desires(1) >= Desires(2))
+					Activity(ChooseRecreation());
 				else
-				{
-					move.SetDestination(GameObject.Find(cell).transform.position);
-					Stats(3, -25);
-					Debug.Log(name + " is going to rest in " + cell);
-				}
+					Rest();
 				break;
 			case int t when (t >= 8 && t <= 11):
-				//recreational time
+				if (Desires(1) > Desires(2))
+					Activity(ChooseRecreation());
+				else
+					Rest();
 				break;
 			case int t when (t >= 13 && t <= 16):
-				//labor time
+				if (Desires(3) > Desires(2))
+					Activity(labor);
+				else
+					Rest();
 				break;
-			case 18:
-				break;
-			case 19:
-				break;
-			case 20:
-				break;
-			case 21:
+			case int t when (t >= 18 && t <= 21):
+				if (Desires(1) > Desires(3) && Desires(1) > Desires(2))
+					Activity(ChooseRecreation());
+				else if (Desires(3) > Desires(2))
+					Activity(labor);
+				else
+					Rest();
 				break;
 		}
+	}
+
+	private void Rest()
+	{
+		move.SetDestination(GameObject.Find(cell).transform.position);
+		Stats(3, -25);
+		Debug.Log(name + " is going to rest in " + cell);
+	}
+
+	private void Activity(string activity)
+	{
+
+		move.SetDestination(GameObject.Find(activity).transform.position);
+		Stats(3, 25);
+		Debug.Log(name + " is going to " + activity);
 	}
 
 	private float Desires(int desire)
@@ -108,59 +121,44 @@ public class Prisoner : MonoBehaviour
 		 * 0 = Food
 		 * 1 = Recreation
 		 * 2 = Sleep/Rest
-		 * 3 = 
-		 * 4 = 
-		 * 5 = 
-		 * 6 = 
-		 * 7 = 
-		 * 8 = 
-		 * 9 = 
+		 * 3 = Labor
 		 */
 
 		float total = 0;
 		switch (desire)
 		{
 			case 0:
-				//based on hunger, rest
+				//based on hunger, fatigue
 				break;
 			case 1:
-				//based on fatigue, exhaustion
+				//based on fatigue, rest
 				break;
 			case 2:
-				//based on fatigue, exhaution, rest
+				//based on fatigue, rest
 				break;
 			case 3:
-				//code here
-				break;
-			case 4:
-				//code here
-				break;
-			case 5:
-				//code here
-				break;
-			case 6:
-				//code here
-				break;
-			case 7:
-				//code here
-				break;
-			case 8:
-				//code here
-				break;
-			case 9:
-				//code here
+				//based on fatigue
 				break;
 		}
 
 		return total;
 	}
 
-	private void Stats(int hunger, int rest, int fatigue, int exhaustion)
+	private string ChooseRecreation()
+	{
+		if (rec1Desire > rec2Desire && rec1Desire > rec3Desire)
+			return rec1;
+		else if (rec2Desire > rec3Desire)
+			return rec2;
+		else
+			return rec3;
+	}
+
+	private void Stats(int hunger, int rest, int fatigue)
 	{
 		this.hunger += hunger;
 		this.sleep += rest;
 		this.fatigue += fatigue;
-		this.exhaustion += exhaustion;
 
 		StatMinMax();
 	}
@@ -177,9 +175,6 @@ public class Prisoner : MonoBehaviour
 				break;
 			case 3:
 				fatigue += magnitude;
-				break;
-			case 4:
-				exhaustion += magnitude;
 				break;
 		}
 
@@ -202,11 +197,6 @@ public class Prisoner : MonoBehaviour
 			fatigue = 100;
 		else if (fatigue < 0)
 			fatigue = 0;
-
-		if (exhaustion > 100)
-			exhaustion = 100;
-		else if (exhaustion < 0)
-			exhaustion = 0;
 	}
 
 	void Eyes()
@@ -216,7 +206,7 @@ public class Prisoner : MonoBehaviour
 		float angle = 78;
 		float segments = angle - 1;
 		Vector3 startPos = transform.position + (Vector3.up * 2);
-		Vector3 targetPos = new Vector3();
+		Vector3 targetPos;
 		float startAngle = -angle * .5f;
 		float finishAngle = angle * .5f;
 		float increment = angle / segments;

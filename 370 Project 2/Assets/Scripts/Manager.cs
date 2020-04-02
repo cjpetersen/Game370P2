@@ -8,6 +8,7 @@ public class Manager : MonoBehaviour
 	public static Manager m { get; private set; }
 
 	public List<string> recRooms;
+	public List<string> labors;
 	public List<GameObject> prisoners;
 	public List<string> firstNames;
 	public List<string> lastNames;
@@ -19,8 +20,6 @@ public class Manager : MonoBehaviour
 	public int day;
 	public int month;
 	public int year;
-
-	public GameObject[] temp;
 
 	void Awake()
 	{
@@ -37,10 +36,10 @@ public class Manager : MonoBehaviour
 
 	void Start()
 	{
-		temp = GameObject.FindGameObjectsWithTag("Prisoner");
+		GameObject[] temp = GameObject.FindGameObjectsWithTag("Prisoner");
 		for (int i = 0; i < temp.Length; i++)
 		{
-			if(i < 10)
+			if(i < 9)
 				temp[i].GetComponent<Prisoner>().cell = "Cell0" + (i + 1).ToString();
 			else
 				temp[i].GetComponent<Prisoner>().cell = "Cell" + (i + 1).ToString();
@@ -63,7 +62,7 @@ public class Manager : MonoBehaviour
 			timer = hourLength;
 			hour++;
 			foreach (GameObject prisoner in prisoners)
-				prisoner.GetComponent<Prisoner>().roomCheck = true;
+				prisoner.GetComponent<Prisoner>().checkSchedule = true;
 			//Debug.Log("Checking Rooms");
 			if (hour == 25)
 			{
