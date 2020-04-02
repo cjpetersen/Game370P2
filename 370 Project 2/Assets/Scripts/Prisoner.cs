@@ -13,18 +13,9 @@ public class Prisoner : MonoBehaviour
 	public int fatigue;
 
 	[Header("Personality")]
-	public string rec1;
-	public string rec2;
-	public string rec3;
+	public string[] recreation = new string[3];
 	public string labor;
 	public int guardTrust;
-
-	[Header("Desires")]
-	public float foodDesire;
-	public float restDesire;
-	public float rec1Desire;
-	public float rec2Desire;
-	public float rec3Desire;
 
 	[Header("Room Information")]
 	public bool checkSchedule = false;
@@ -34,17 +25,15 @@ public class Prisoner : MonoBehaviour
 	void Start()
 	{
 		#region Randomized starting stats
-		rec1 = Manager.m.recRooms[Random.Range(0, Manager.m.recRooms.Count)];
-		do { rec2 = Manager.m.recRooms[Random.Range(0, Manager.m.recRooms.Count)]; } while (rec2 == rec1);
-		do { rec3 = Manager.m.recRooms[Random.Range(0, Manager.m.recRooms.Count)]; } while (rec3 == rec1 || rec3 == rec2);
+		recreation[0] = Manager.m.recRooms[Random.Range(0, Manager.m.recRooms.Count)];
+		do { recreation[1] = Manager.m.recRooms[Random.Range(0, Manager.m.recRooms.Count)]; } while (recreation[1] == recreation[0]);
+		do { recreation[2] = Manager.m.recRooms[Random.Range(0, Manager.m.recRooms.Count)]; } while (recreation[2] == recreation[0] || recreation[2] == recreation[1]);
 		labor = Manager.m.labors[Random.Range(0, Manager.m.labors.Count)];
 		hunger = Random.Range(50, 101);
 		sleep = Random.Range(50, 101);
 		fatigue = Random.Range(0, 51);
 		guardTrust = Random.Range(0, 101);
 		#endregion
-
-		//Eyes();
 	}
 
 	void Update()
@@ -73,13 +62,13 @@ public class Prisoner : MonoBehaviour
 					Debug.Log(name + " is going to go eat.");
 				}
 				else if (Desires(1) >= Desires(2))
-					Activity(ChooseRecreation());
+					Activity(recreation[Random.Range(0, recreation.Length)]);
 				else
 					Rest();
 				break;
 			case int t when (t >= 8 && t <= 11):
 				if (Desires(1) > Desires(2))
-					Activity(ChooseRecreation());
+					Activity(recreation[Random.Range(0, recreation.Length)]);
 				else
 					Rest();
 				break;
@@ -91,7 +80,7 @@ public class Prisoner : MonoBehaviour
 				break;
 			case int t when (t >= 18 && t <= 21):
 				if (Desires(1) > Desires(3) && Desires(1) > Desires(2))
-					Activity(ChooseRecreation());
+					Activity(recreation[Random.Range(0, recreation.Length)]);
 				else if (Desires(3) > Desires(2))
 					Activity(labor);
 				else
@@ -128,30 +117,20 @@ public class Prisoner : MonoBehaviour
 		switch (desire)
 		{
 			case 0:
-				//based on hunger, fatigue
+				total = Mathf.Exp(5 * ((hunger / 100) - (.25f * (fatigue / 100))) - 5);
 				break;
 			case 1:
-				//based on fatigue, rest
+				total = 0 - ((((sleep / 100) - (fatigue / 100)) - 1) ^ 2) + 1;
 				break;
 			case 2:
-				//based on fatigue, rest
+				total = 0 - ((.5f * Mathf.Atan(50 * (((sleep / 100) - (fatigue / 100)) - .25f))) / (Mathf.PI / 2)) + .5f;
 				break;
 			case 3:
-				//based on fatigue
+				total = (((fatigue / 100) - 1) ^ 2) + .5f;
 				break;
 		}
 
 		return total;
-	}
-
-	private string ChooseRecreation()
-	{
-		if (rec1Desire > rec2Desire && rec1Desire > rec3Desire)
-			return rec1;
-		else if (rec2Desire > rec3Desire)
-			return rec2;
-		else
-			return rec3;
 	}
 
 	private void Stats(int hunger, int rest, int fatigue)
@@ -197,33 +176,5 @@ public class Prisoner : MonoBehaviour
 			fatigue = 100;
 		else if (fatigue < 0)
 			fatigue = 0;
-	}
-
-	void Eyes()
-	{
-		RaycastHit hit;
-		float distance = 15f;
-		float angle = 78;
-		float segments = angle - 1;
-		Vector3 startPos = transform.position + (Vector3.up * 2);
-		Vector3 targetPos;
-		float startAngle = -angle * .5f;
-		float finishAngle = angle * .5f;
-		float increment = angle / segments;
-
-		for (float i = startAngle; i < finishAngle; i += increment)
-		{
-			targetPos = (Quaternion.Euler(0, i, 0) * transform.forward).normalized * distance;
-
-			if (Physics.Raycast(startPos, targetPos, out hit, distance))
-			{
-				if (hit.collider.gameObject.tag == "Guard")
-				{
-					//Do something to make them move away
-					Debug.Log("REEEE");
-				}
-			}
-			Debug.DrawRay(startPos, targetPos, Color.red);
-		}
 	}
 }
