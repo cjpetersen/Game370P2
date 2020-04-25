@@ -36,6 +36,7 @@ public class Manager : MonoBehaviour
 
 	void Start()
 	{
+		//can be moved to prisoner start
 		GameObject[] temp = GameObject.FindGameObjectsWithTag("Prisoner");
 		for (int i = 0; i < temp.Length; i++)
 		{
@@ -61,7 +62,7 @@ public class Manager : MonoBehaviour
 		{
 			timer = hourLength;
 			hour++;
-			foreach (GameObject prisoner in prisoners)
+			foreach (GameObject prisoner in prisoners) //see aobut moving this to prisoner script
 				prisoner.GetComponent<Prisoner>().checkSchedule = true;
 			//Debug.Log("Checking Rooms");
 			if (hour == 25)
