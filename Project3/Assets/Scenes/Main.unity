@@ -388,6 +388,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputField: {fileID: 1495161256}
+  articles: []
+  prepositions: []
 --- !u!114 &589499116
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -400,6 +402,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62762854aad1a2a47a9f892b02b93997, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  distanceX: 5
+  distanceZ: 5
+  floors: 1
   output: {fileID: 293844481}
   actions:
   - go

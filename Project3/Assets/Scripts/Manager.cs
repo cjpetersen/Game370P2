@@ -6,6 +6,9 @@ using UnityEngine.UI;
 
 public class Manager : MonoBehaviour
 {
+	public int distanceX, distanceZ, floors;
+	public GameObject[,,] map;
+
 	[Header("Text Control")]
 	public Text output;
 	public List<string> actions;
@@ -13,13 +16,10 @@ public class Manager : MonoBehaviour
 
 	[Header("Player")]
 	public GameObject currentRoom;
+	public int currentFloor;
 
 	public Dictionary<string, string> objects;
 	public List<GameObject> roomTypes;
-
-	[Header("Map")]
-	public int distanceX, distanceZ, floors;
-	public GameObject[,,] map;
 
 	void Start()
 	{
@@ -80,6 +80,14 @@ public class Manager : MonoBehaviour
 				if (room.exits[3])
 					nextRoom = map[room.locX, room.locZ - 1, room.floor];
 				break;
+			case "up":
+				if(room.roomName == "stairs" && currentFloor < floors)
+					nextRoom = map[room.locX, room.locZ, room.floor + 1];
+				break;
+			case "down":
+				if (room.roomName == "stairs" && currentFloor > 1)
+					nextRoom = map[room.locX, room.locZ, room.floor - 1];
+				break;
 		}
 		if (nextRoom != null)
 		{
@@ -130,14 +138,16 @@ public class Manager : MonoBehaviour
 				for (int z = 0; z < distanceZ; z++)
 				{
 					bool criticalRoom = false;
-					if (start.Compair(x, z))
+					if (start.Compair(x, z) && f == 0)
 						criticalRoom = true;
-					else if (end.Compair(x, z))
+					else if (end.Compair(x, z) && f == endF)
+						criticalRoom = true;
+					else if (stairs.Compair(x, z))
 						criticalRoom = true;
 
 					if (criticalRoom)
 					{
-						if (start.Compair(x, z))
+						if (start.Compair(x, z) && f == 0)
 						{
 							temp = (GameObject)Instantiate(Resources.Load("room"));
 							temp.name = "Start Room";
@@ -145,18 +155,25 @@ public class Manager : MonoBehaviour
 							RoomDetails(room, id, "start", x, z, f, 0);
 							currentRoom = temp;
 						} //start room
-						else if (end.Compair(x, z))
+						else if (end.Compair(x, z) && f == endF)
 						{
 							temp = (GameObject)Instantiate(Resources.Load("room"));
 							temp.name = "End Room";
 							room = temp.GetComponent<Room>();
-							RoomDetails(room, id, "end", x, z, f, 2);
+							RoomDetails(room, id, "end", x, z, f, 1);
 						} //end room
+						else if (stairs.Compair(x, z))
+						{
+							temp = (GameObject)Instantiate(Resources.Load("room"));
+							temp.name = "Stairwell";
+							room = temp.GetComponent<Room>();
+							RoomDetails(room, id, "stairs", x, z, f, 2);
+						}
 					} //make critical rooms
 					else
 					{
 						float roll = Random.Range(0f, 100f);
-						if(roll <= chance[0])
+						if (roll <= chance[0])
 						{
 							temp = (GameObject)Instantiate(Resources.Load("room"));
 							temp.name = "Room" + id;
@@ -178,7 +195,7 @@ public class Manager : MonoBehaviour
 		room.locX = x;
 		room.locZ = z;
 		room.floor = f;
-		room.roomName = "start";
+		room.roomName = name;
 		room.description = GenerateDescription(type);
 
 		if (x == distanceX - 1)
@@ -223,8 +240,10 @@ public class Manager : MonoBehaviour
 	{
 		if (roomType == 0)
 			return "This is the start, go find the end.";
-		else if (roomType == 2)
+		else if (roomType == 1)
 			return "This is it, you found the end.";
+		else if (roomType == 2)
+			return "This is a stairwell.";
 		else if (roomType == -1)
 			return "It's a door ";
 		else
