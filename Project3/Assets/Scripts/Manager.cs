@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,11 +17,13 @@ public class Manager : MonoBehaviour
 	public Dictionary<string, string> objects;
 	public List<GameObject> roomTypes;
 
-	public List<GameObject> roomList;
-	public GameObject[,,] map = new GameObject[10,10,3];
+	[Header("Map")]
+	public int distanceX, distanceZ, floors;
+	public GameObject[,,] map;
 
 	void Start()
 	{
+		map = new GameObject[distanceX, distanceZ, floors];
 		GenerateMap();
 		DisplayRoomText();
 		DisplayLoggedText();
@@ -35,6 +38,7 @@ public class Manager : MonoBehaviour
 	{
 		string logAsText = string.Join("\n", logToOutput.ToArray());
 		output.text = logAsText;
+		Debug.Log(currentRoom.GetComponent<Room>().locX + " | " + currentRoom.GetComponent<Room>().locZ);
 	}
 
 	public void TakeAction(List<string> input)
@@ -57,23 +61,27 @@ public class Manager : MonoBehaviour
 	public void AttemptToChangeRooms(string direction)
 	{
 		GameObject nextRoom = null;
-
+		Room room = currentRoom.GetComponent<Room>();
 		switch (direction)
 		{
 			case "north":
-				nextRoom = currentRoom.GetComponent<Room>().exitRooms[0];
+				if (room.exits[0])
+					nextRoom = map[room.locX + 1, room.locZ, room.floor];
 				break;
 			case "south":
-				nextRoom = currentRoom.GetComponent<Room>().exitRooms[1];
+				if (room.exits[1])
+					nextRoom = map[room.locX - 1, room.locZ, room.floor];
 				break;
 			case "east":
-				nextRoom = currentRoom.GetComponent<Room>().exitRooms[2];
+				if (room.exits[2])
+					nextRoom = map[room.locX, room.locZ + 1, room.floor];
 				break;
 			case "west":
-				nextRoom = currentRoom.GetComponent<Room>().exitRooms[3];
+				if (room.exits[3])
+					nextRoom = map[room.locX, room.locZ - 1, room.floor];
 				break;
 		}
-		if (nextRoom != null && currentRoom.GetComponent<Room>().exitRooms.Contains(nextRoom))
+		if (nextRoom != null)
 		{
 			currentRoom = nextRoom;
 			AddToLog("You head off to the " + direction);
@@ -94,7 +102,7 @@ public class Manager : MonoBehaviour
 		for(int i = 0; i < 4; i++)
 		{
 			if (currentRoom.GetComponent<Room>().exitDescs[i] != "")
-				outputText += "There is " + currentRoom.GetComponent<Room>().exitDescs[i].ToLower();
+				outputText += "There is " + currentRoom.GetComponent<Room>().exitDescs[i].ToLower() + "\n";
 		}
 
 		AddToLog(outputText);
@@ -102,149 +110,111 @@ public class Manager : MonoBehaviour
 
 	public void GenerateMap()
 	{
-		bool done = false, started = false;
 		float[] chance = new float[1] { 100f };
-		Room prevprevRoom = null, prevRoom = null, room;
-		int id = 1, startX, startZ, endX, endZ;
-		GameObject temp;
+		Room room;
+		Coords start = new Coords(), end = new Coords(), stairs = new Coords();
+		int id = 1, endF;
+		GameObject temp = null;
 
-		#region Free Range Generation
-		//temp = (GameObject)Instantiate(Resources.Load("room"));
-		//temp.name = "Start Room";
-		//roomList.Add(temp);
-		//room = temp.GetComponent<Room>();
-		//room.ID = id;
-		//room.name = "start";
-		//room.description = GenerateDescription(0);
-		//currentRoom = temp;
+		//critical room locations
+		start.Set(Random.Range(0, distanceX), Random.Range(0, distanceZ));
+		do { end.Set(Random.Range(0, distanceX), Random.Range(0, distanceZ)); endF = Random.Range(0, floors); }
+		while(endF != 0 || start.Compair(end));
+		do { stairs.Set(Random.Range(0, distanceX), Random.Range(0, distanceZ)); } while (stairs.Compair(start) || stairs.Compair(end));
 
-		//while (!done) 
-		//// for(int i = 0; i < 5; i++)
-		//{
-		//	float rand = Random.Range(1f, 100f);
-		//	if (rand <= chance[0])
-		//	{
-		//		temp = (GameObject)Instantiate(Resources.Load("room"));
-		//		temp.name = "Room" + id;
-		//		roomList.Add(temp);
-		//		if (prevRoom != null)
-		//			prevprevRoom = prevRoom;
-		//		prevRoom = room;
-		//		room = temp.GetComponent<Room>();
-		//		room.name = "room";
-		//		chance[0] -= 1f;
-		//	}
-		//	else
-		//	{
-		//		done = true;
-		//	}
-
-		//	id++;
-		//	room.ID = id;
-		//	if (prevRoom != null)
-		//		GenerateExit(prevprevRoom, prevRoom, room);
-		//}
-
-		//temp = (GameObject)Instantiate(Resources.Load("room"));
-		//temp.name = "End Room";
-		//roomList.Add(temp);
-		//prevprevRoom = prevRoom;
-		//prevRoom = room;
-		//room = temp.GetComponent<Room>();
-		//room.name = "end";
-		//room.description = GenerateDescription(2);
-		//room.ID = id++;
-		//GenerateExit(prevprevRoom, prevRoom, room);
-		#endregion
-		#region Caged Generation
-		//critical room generation
-		startX = Random.Range(0, 5); startZ = Random.Range(0, 5);
-		do { endX = Random.Range(0, 5); endZ = Random.Range(0, 5); } while(endX == startX && endZ == startZ);
-
-		//filler room generation
-		for(int i = 0; i < 5; i++)
+		//room generation
+		for (int f = 0; f < floors; f++)
 		{
-			for(int j = 0; j < 5; j++)
+			for (int x = 0; x < distanceX; x++)
 			{
-				bool criticalRoom = false;
-				if (i == startX && j == startZ)
-					criticalRoom = true;
-				else if (i == endX && j == endZ)
-					criticalRoom = true;
-
-				if (criticalRoom)
+				for (int z = 0; z < distanceZ; z++)
 				{
-					if(i == startX && j == startZ)
+					bool criticalRoom = false;
+					if (start.Compair(x, z))
+						criticalRoom = true;
+					else if (end.Compair(x, z))
+						criticalRoom = true;
+
+					if (criticalRoom)
 					{
-						temp = (GameObject)Instantiate(Resources.Load("room"));
-						temp.name = "Start Room";
-						roomList.Add(temp);
-						room = temp.GetComponent<Room>();
-						room.ID = id;
-						room.roomName = "start";
-						room.description = GenerateDescription(0);
-						currentRoom = temp;
-					}
+						if (start.Compair(x, z))
+						{
+							temp = (GameObject)Instantiate(Resources.Load("room"));
+							temp.name = "Start Room";
+							room = temp.GetComponent<Room>();
+							RoomDetails(room, id, "start", x, z, f, 0);
+							currentRoom = temp;
+						} //start room
+						else if (end.Compair(x, z))
+						{
+							temp = (GameObject)Instantiate(Resources.Load("room"));
+							temp.name = "End Room";
+							room = temp.GetComponent<Room>();
+							RoomDetails(room, id, "end", x, z, f, 2);
+						} //end room
+					} //make critical rooms
 					else
 					{
-						//make end
-					}
-				}
-				else
-				{
-					//make room
+						float roll = Random.Range(0f, 100f);
+						if(roll <= chance[0])
+						{
+							temp = (GameObject)Instantiate(Resources.Load("room"));
+							temp.name = "Room" + id;
+							room = temp.GetComponent<Room>();
+							RoomDetails(room, id, "room", x, z, f, -5);
+						}
+					} //make filler rooms
 
-					//float rand = Random.Range(0f, 100f);
-					//switch (rand)
-					//{
-					//	case float c when (c >= 0 && c <= chance[0]):
-					//		break;
-					//}
+					id++;
+					map[x, z, f] = temp;
 				}
-
-				id++;
 			}
 		}
-		#endregion
 	}
 
-	public void GenerateExit(Room prevprevRoom, Room prevRoom, Room room)
+	public void RoomDetails(Room room, int id, string name, int x, int z, int f, int type)
 	{
-		//5% chance to make an offshoot room
-		if (Random.Range(0, 10) == 0)
-		{
-			prevRoom = prevprevRoom;
-		}
+		room.ID = id;
+		room.locX = x;
+		room.locZ = z;
+		room.floor = f;
+		room.roomName = "start";
+		room.description = GenerateDescription(type);
 
-		//Pick a direction to go that isn't taken yet
-		int direction;
-		do { direction = Random.Range(0, 4); } while (prevRoom.exitRooms[direction] != null);
+		if (x == distanceX - 1)
+			room.exits[0] = false;
+		else if (x == 0)
+			room.exits[1] = false;
 
+		if (z == distanceZ - 1)
+			room.exits[2] = false;
+		else if (z == 0)
+			room.exits[3] = false;
+
+		for (int i = 0; i < 4; i++)
+			if (room.exits[i])
+				GenerateExit(room, i);
+	}
+
+	public void GenerateExit(Room room, int direction)
+	{
 		switch (direction)
 		{
 			case 0:
-				prevRoom.exitRooms[0] = room.gameObject;
-				prevRoom.exitDescs[0] = GenerateDescription(-1) + "to the north.";
-				room.exitRooms[1] = prevRoom.gameObject;
-				room.exitDescs[1] = GenerateDescription(-1) + "to the south.";
+				if (room.locX != distanceX - 1)
+					room.exitDescs[direction] = GenerateDescription(-1) + "to the north";
 				break;
 			case 1:
-				prevRoom.exitRooms[1] = room.gameObject;
-				prevRoom.exitDescs[1] = GenerateDescription(-1) + "to the south.";
-				room.exitRooms[0] = prevRoom.gameObject;
-				room.exitDescs[0] = GenerateDescription(-1) + "to the north.";
+				if (room.locX != 0)
+					room.exitDescs[direction] = GenerateDescription(-1) + "to the south";
 				break;
 			case 2:
-				prevRoom.exitRooms[2] = room.gameObject;
-				prevRoom.exitDescs[2] = GenerateDescription(-1) + "to the east.";
-				room.exitRooms[3] = prevRoom.gameObject;
-				room.exitDescs[3] = GenerateDescription(-1) + "to the west.";
+				if (room.locZ != distanceZ - 1)
+					room.exitDescs[direction] = GenerateDescription(-1) + "to the east";
 				break;
 			case 3:
-				prevRoom.exitRooms[3] = room.gameObject;
-				prevRoom.exitDescs[3] = GenerateDescription(-1) + "to the west.";
-				room.exitRooms[2] = prevRoom.gameObject;
-				room.exitDescs[2] = GenerateDescription(-1) + "to the east.";
+				if (room.locZ != 0)
+					room.exitDescs[direction] = GenerateDescription(-1) + "to the west";
 				break;
 		}
 	}
