@@ -28,7 +28,6 @@ By
 Circa
 Concerning
 Despite
-Down
 Dueto
 During
 In
@@ -71,7 +70,6 @@ Underneath
 Unlike
 Until
 Unto
-Up
 Upon
 Via
 With

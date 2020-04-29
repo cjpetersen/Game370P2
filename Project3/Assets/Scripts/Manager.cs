@@ -8,6 +8,7 @@ public class Manager : MonoBehaviour
 {
 	public int distanceX, distanceZ, floors;
 	public GameObject[,,] map;
+	public char[,,] visualMap;
 
 	[Header("Text Control")]
 	public Text output;
@@ -16,7 +17,6 @@ public class Manager : MonoBehaviour
 
 	[Header("Player")]
 	public GameObject currentRoom;
-	public int currentFloor;
 
 	public Dictionary<string, string> objects;
 	public List<GameObject> roomTypes;
@@ -24,6 +24,7 @@ public class Manager : MonoBehaviour
 	void Start()
 	{
 		map = new GameObject[distanceX, distanceZ, floors];
+		visualMap = new char[distanceX, distanceZ, floors];
 		GenerateMap();
 		DisplayRoomText();
 		DisplayLoggedText();
@@ -38,7 +39,7 @@ public class Manager : MonoBehaviour
 	{
 		string logAsText = string.Join("\n", logToOutput.ToArray());
 		output.text = logAsText;
-		Debug.Log(currentRoom.GetComponent<Room>().locX + " | " + currentRoom.GetComponent<Room>().locZ);
+		Debug.Log(currentRoom.GetComponent<Room>().coords.x + " | " + currentRoom.GetComponent<Room>().coords.z + " | " + currentRoom.GetComponent<Room>().coords.f);
 	}
 
 	public void TakeAction(List<string> input)
@@ -51,6 +52,9 @@ public class Manager : MonoBehaviour
 			case "examine":
 				if (input.Count == 1 || input[1] == "room")
 					DisplayRoomText();
+				break;
+			case "map":
+				DisplayMap(currentRoom.GetComponent<Room>().coords.f);
 				break;
 			default:
 				AddToLog("I don't understand that.");
@@ -66,27 +70,27 @@ public class Manager : MonoBehaviour
 		{
 			case "north":
 				if (room.exits[0])
-					nextRoom = map[room.locX + 1, room.locZ, room.floor];
+					nextRoom = map[room.coords.x + 1, room.coords.z, room.coords.f];
 				break;
 			case "south":
 				if (room.exits[1])
-					nextRoom = map[room.locX - 1, room.locZ, room.floor];
+					nextRoom = map[room.coords.x - 1, room.coords.z, room.coords.f];
 				break;
 			case "east":
 				if (room.exits[2])
-					nextRoom = map[room.locX, room.locZ + 1, room.floor];
+					nextRoom = map[room.coords.x, room.coords.z + 1, room.coords.f];
 				break;
 			case "west":
 				if (room.exits[3])
-					nextRoom = map[room.locX, room.locZ - 1, room.floor];
+					nextRoom = map[room.coords.x, room.coords.z - 1, room.coords.f];
 				break;
 			case "up":
-				if(room.roomName == "stairs" && currentFloor < floors)
-					nextRoom = map[room.locX, room.locZ, room.floor + 1];
+				if(room.roomName == "stairs" && currentRoom.GetComponent<Room>().coords.f < floors)
+					nextRoom = map[room.coords.x, room.coords.z, room.coords.f + 1];
 				break;
 			case "down":
-				if (room.roomName == "stairs" && currentFloor > 1)
-					nextRoom = map[room.locX, room.locZ, room.floor - 1];
+				if (room.roomName == "stairs" && currentRoom.GetComponent<Room>().coords.f > 0)
+					nextRoom = map[room.coords.x, room.coords.z, room.coords.f - 1];
 				break;
 		}
 		if (nextRoom != null)
@@ -116,19 +120,33 @@ public class Manager : MonoBehaviour
 		AddToLog(outputText);
 	}
 
+	public void DisplayMap(int floor)
+	{
+		string mapRow = "";
+		for(int i = distanceX - 1; i >= 0; i--)
+		{
+			for(int j = 0; j < distanceZ; j++)
+			{
+				mapRow += visualMap[i, j, floor];
+			}
+			mapRow += "\n";
+		}
+		AddToLog(mapRow);
+		DisplayLoggedText();
+	}
+
 	public void GenerateMap()
 	{
 		float[] chance = new float[1] { 100f };
 		Room room;
 		Coords start = new Coords(), end = new Coords(), stairs = new Coords();
-		int id = 1, endF;
+		int id = 1;
 		GameObject temp = null;
 
 		//critical room locations
 		start.Set(Random.Range(0, distanceX), Random.Range(0, distanceZ));
-		do { end.Set(Random.Range(0, distanceX), Random.Range(0, distanceZ)); endF = Random.Range(0, floors); }
-		while(endF != 0 || start.Compair(end));
-		do { stairs.Set(Random.Range(0, distanceX), Random.Range(0, distanceZ)); } while (stairs.Compair(start) || stairs.Compair(end));
+		end.Set(Random.Range(0, distanceX), Random.Range(0, distanceZ), floors - 1);
+		do { stairs.Set(Random.Range(0, distanceX), Random.Range(0, distanceZ)); } while (stairs.CompairIgnoreFloor(start) || stairs.CompairIgnoreFloor(end));
 
 		//room generation
 		for (int f = 0; f < floors; f++)
@@ -140,7 +158,7 @@ public class Manager : MonoBehaviour
 					bool criticalRoom = false;
 					if (start.Compair(x, z) && f == 0)
 						criticalRoom = true;
-					else if (end.Compair(x, z) && f == endF)
+					else if (end.Compair(x, z) && f == end.f)
 						criticalRoom = true;
 					else if (stairs.Compair(x, z))
 						criticalRoom = true;
@@ -154,13 +172,15 @@ public class Manager : MonoBehaviour
 							room = temp.GetComponent<Room>();
 							RoomDetails(room, id, "start", x, z, f, 0);
 							currentRoom = temp;
+							visualMap[x, z, f] = 'S';
 						} //start room
-						else if (end.Compair(x, z) && f == endF)
+						else if (end.Compair(x, z) && f == end.f)
 						{
 							temp = (GameObject)Instantiate(Resources.Load("room"));
 							temp.name = "End Room";
 							room = temp.GetComponent<Room>();
 							RoomDetails(room, id, "end", x, z, f, 1);
+							visualMap[x, z, f] = 'E';
 						} //end room
 						else if (stairs.Compair(x, z))
 						{
@@ -168,6 +188,7 @@ public class Manager : MonoBehaviour
 							temp.name = "Stairwell";
 							room = temp.GetComponent<Room>();
 							RoomDetails(room, id, "stairs", x, z, f, 2);
+							visualMap[x, z, f] = 's';
 						}
 					} //make critical rooms
 					else
@@ -179,6 +200,7 @@ public class Manager : MonoBehaviour
 							temp.name = "Room" + id;
 							room = temp.GetComponent<Room>();
 							RoomDetails(room, id, "room", x, z, f, -5);
+							visualMap[x, z, f] = 'r';
 						}
 					} //make filler rooms
 
@@ -192,9 +214,7 @@ public class Manager : MonoBehaviour
 	public void RoomDetails(Room room, int id, string name, int x, int z, int f, int type)
 	{
 		room.ID = id;
-		room.locX = x;
-		room.locZ = z;
-		room.floor = f;
+		room.coords.Set(x, z, f);
 		room.roomName = name;
 		room.description = GenerateDescription(type);
 
@@ -218,19 +238,19 @@ public class Manager : MonoBehaviour
 		switch (direction)
 		{
 			case 0:
-				if (room.locX != distanceX - 1)
+				if (room.coords.x != distanceX - 1)
 					room.exitDescs[direction] = GenerateDescription(-1) + "to the north";
 				break;
 			case 1:
-				if (room.locX != 0)
+				if (room.coords.x != 0)
 					room.exitDescs[direction] = GenerateDescription(-1) + "to the south";
 				break;
 			case 2:
-				if (room.locZ != distanceZ - 1)
+				if (room.coords.z != distanceZ - 1)
 					room.exitDescs[direction] = GenerateDescription(-1) + "to the east";
 				break;
 			case 3:
-				if (room.locZ != 0)
+				if (room.coords.z != 0)
 					room.exitDescs[direction] = GenerateDescription(-1) + "to the west";
 				break;
 		}

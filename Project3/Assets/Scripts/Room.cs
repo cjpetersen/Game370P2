@@ -7,7 +7,7 @@ public class Room : MonoBehaviour
 	public int ID;
 	public string description;
 	public string roomName;
-	public int locX, locZ, floor;
+	public Coords coords;
 	public string[] exitDescs = new string[4] { "", "", "", "" };
 	//public bool[] exits = new bool[4] { false, false, false, false };
 	public bool[] exits = new bool[4] { true, true, true, true };
