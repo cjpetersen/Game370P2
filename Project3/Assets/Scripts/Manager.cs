@@ -137,6 +137,7 @@ public class Manager : MonoBehaviour
 
 	public void GenerateMap()
 	{
+		string floorType = "basement";
 		float[] chance = new float[1] { 100f };
 		Room room;
 		Coords start = new Coords(), end = new Coords(), stairs = new Coords();
@@ -144,7 +145,7 @@ public class Manager : MonoBehaviour
 		GameObject temp = null;
 
 		//critical room locations
-		start.Set(Random.Range(0, distanceX), Random.Range(0, distanceZ));
+		start.Set(Random.Range(0, distanceX), Random.Range(0, distanceZ), 1);
 		end.Set(Random.Range(0, distanceX), Random.Range(0, distanceZ), floors - 1);
 		do { stairs.Set(Random.Range(0, distanceX), Random.Range(0, distanceZ)); } while (stairs.CompairIgnoreFloor(start) || stairs.CompairIgnoreFloor(end));
 
@@ -165,7 +166,7 @@ public class Manager : MonoBehaviour
 
 					if (criticalRoom)
 					{
-						if (start.Compair(x, z) && f == 0)
+						if (start.Compair(x, z, 1))
 						{
 							temp = (GameObject)Instantiate(Resources.Load("room"));
 							temp.name = "Start Room";
@@ -174,7 +175,7 @@ public class Manager : MonoBehaviour
 							currentRoom = temp;
 							visualMap[x, z, f] = 'S';
 						} //start room
-						else if (end.Compair(x, z) && f == end.f)
+						else if (end.Compair(x, z, end.f))
 						{
 							temp = (GameObject)Instantiate(Resources.Load("room"));
 							temp.name = "End Room";
@@ -208,6 +209,11 @@ public class Manager : MonoBehaviour
 					map[x, z, f] = temp;
 				}
 			}
+
+			if (floorType == "basement")
+				floorType = "main";
+			else if (floorType == "main")
+				floorType = "Upper";
 		}
 	}
 
