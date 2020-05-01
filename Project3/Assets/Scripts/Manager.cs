@@ -10,6 +10,7 @@ public class Manager : MonoBehaviour
 	public GameObject[,,] map;
 	public string[,,] visualMap;
 	public List<Item> items;
+	public List<Item> itemGen;
 
 	[Header("Text Control")]
 	public Text output;
@@ -325,9 +326,11 @@ public class Manager : MonoBehaviour
 		roomGen.name = name + " " + id;
 		Room room = roomGen.GetComponent<Room>();
 		room.ID = id;
+		room.type = type;
 		room.coords = coords;
 		room.roomName = name;
 		room.description = GenerateDescription(type);
+		GenerateItems(room);
 
 		if (type == 4)
 		{
@@ -348,6 +351,17 @@ public class Manager : MonoBehaviour
 		for (int i = 0; i < 4; i++)
 			if (room.exits[i])
 				GenerateExit(room, i);
+	}
+
+	public void GenerateItems(Room room)
+	{
+		int amount = Random.Range(0, 5);
+		for(int i = 0; i < amount; i++)
+		{
+			int item = Random.Range(0, itemGen.Count);
+			if (itemGen[item].allowedRooms.Contains(room.type))
+				room.items.Add(itemGen[item]);
+		}
 	}
 
 	public void GenerateExit(Room room, int direction)

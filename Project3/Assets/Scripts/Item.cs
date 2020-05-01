@@ -7,6 +7,7 @@ public class Item
 {
 	public string name;
 	public string description;
+	public List<int> allowedRooms;
 
 	public Item() { }
 	public Item(string name, string desc)

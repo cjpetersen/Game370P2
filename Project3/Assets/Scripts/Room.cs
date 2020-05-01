@@ -5,6 +5,7 @@ using UnityEngine;
 public class Room : MonoBehaviour
 {
 	public int ID;
+	public int type;
 	public string description;
 	public string roomName;
 	public Coords coords;
