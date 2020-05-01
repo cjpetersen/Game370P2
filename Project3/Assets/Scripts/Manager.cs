@@ -9,6 +9,7 @@ public class Manager : MonoBehaviour
 	public int distanceX, distanceZ, floors;
 	public GameObject[,,] map;
 	public string[,,] visualMap;
+	public List<Item> items;
 
 	[Header("Text Control")]
 	public Text output;
@@ -17,9 +18,7 @@ public class Manager : MonoBehaviour
 
 	[Header("Player")]
 	public GameObject currentRoom;
-
-	public Dictionary<string, string> objects;
-	public List<GameObject> roomTypes;
+	public List<Item> inventory;
 
 	GameObject roomGen;
 
@@ -54,6 +53,18 @@ public class Manager : MonoBehaviour
 			case "examine":
 				if (input.Count == 1 || input[1] == "room")
 					DisplayRoomText();
+				else
+				{
+					for (int i = 0; i < items.Count; i++)
+					{
+						if (input[1] == items[i].name)
+						{
+							AddToLog(items[i].description);
+							DisplayLoggedText();
+							i = items.Count;
+						}
+					}
+				}
 				break;
 			case "map":
 				DisplayMap(currentRoom.GetComponent<Room>().coords.f);
@@ -99,7 +110,7 @@ public class Manager : MonoBehaviour
 		{
 			currentRoom = nextRoom;
 			AddToLog("You head off to the " + direction);
-			objects = nextRoom.GetComponent<Room>().objects;
+			items = nextRoom.GetComponent<Room>().items;
 			DisplayRoomText();
 		}
 		else
@@ -113,6 +124,18 @@ public class Manager : MonoBehaviour
 	{
 		string outputText = currentRoom.GetComponent<Room>().roomName + "\n";
 		outputText += currentRoom.GetComponent<Room>().description + "\n";
+
+		if (items.Count > 0)
+		{
+			outputText += "The room contains ";
+			for (int i = 0; i < items.Count; i++)
+			{
+				if (i != items.Count - 1)
+					outputText += items[i].name + ", ";
+				else
+					outputText += "and " + items[i].name + ".\n";
+			}
+		}
 
 		for(int i = 0; i < 4; i++)
 		{

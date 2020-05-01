@@ -409,7 +409,10 @@ MonoBehaviour:
   - go
   - examine
   - map
-  logToOutput: []
+  - get
+  logToOutput:
+  - 'Controls: Go [direction], examine, examine [object], map, get [object]'
+  - 
   currentRoom: {fileID: 0}
   roomTypes: []
 --- !u!4 &589499117
