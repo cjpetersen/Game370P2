@@ -7,6 +7,12 @@ public class Coords
 {
 	public int x, z, f = 0;
 
+	public Coords() { }
+	public Coords(int x, int z, int f)
+	{
+		Set(x, z, f);
+	}
+
 	public bool Compair(Coords c)
 	{
 		if (x == c.x && z == c.z && f == c.f)

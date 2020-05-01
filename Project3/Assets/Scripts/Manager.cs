@@ -8,7 +8,7 @@ public class Manager : MonoBehaviour
 {
 	public int distanceX, distanceZ, floors;
 	public GameObject[,,] map;
-	public char[,,] visualMap;
+	public string[,,] visualMap;
 
 	[Header("Text Control")]
 	public Text output;
@@ -21,10 +21,12 @@ public class Manager : MonoBehaviour
 	public Dictionary<string, string> objects;
 	public List<GameObject> roomTypes;
 
+	GameObject roomGen;
+
 	void Start()
 	{
 		map = new GameObject[distanceX, distanceZ, floors];
-		visualMap = new char[distanceX, distanceZ, floors];
+		visualMap = new string[distanceX, distanceZ, floors];
 		GenerateMap();
 		DisplayRoomText();
 		DisplayLoggedText();
@@ -109,7 +111,8 @@ public class Manager : MonoBehaviour
 
 	public void DisplayRoomText()
 	{
-		string outputText = currentRoom.GetComponent<Room>().description + "\n";
+		string outputText = currentRoom.GetComponent<Room>().roomName + "\n";
+		outputText += currentRoom.GetComponent<Room>().description + "\n";
 
 		for(int i = 0; i < 4; i++)
 		{
@@ -138,11 +141,9 @@ public class Manager : MonoBehaviour
 	public void GenerateMap()
 	{
 		string floorType = "basement";
-		float[] chance = new float[1] { 100f };
-		Room room;
+		float[] floorChance = new float[5] { 20f, 40f, 60f, 80f, 100f };
 		Coords start = new Coords(), end = new Coords(), stairs = new Coords();
 		int id = 1;
-		GameObject temp = null;
 
 		//critical room locations
 		start.Set(Random.Range(0, distanceX), Random.Range(0, distanceZ), 1);
@@ -156,82 +157,169 @@ public class Manager : MonoBehaviour
 			{
 				for (int z = 0; z < distanceZ; z++)
 				{
+					Coords coords = new Coords(x, z, f);
 					bool criticalRoom = false;
-					if (start.Compair(x, z) && f == 0)
+					if (start.Compair(x, z, f))
 						criticalRoom = true;
-					else if (end.Compair(x, z) && f == end.f)
+					else if (end.Compair(x, z, f))
 						criticalRoom = true;
 					else if (stairs.Compair(x, z))
 						criticalRoom = true;
 
 					if (criticalRoom)
 					{
-						if (start.Compair(x, z, 1))
+						if (start.Compair(x, z, f))
 						{
-							temp = (GameObject)Instantiate(Resources.Load("room"));
-							temp.name = "Start Room";
-							room = temp.GetComponent<Room>();
-							RoomDetails(room, id, "start", x, z, f, 0);
-							currentRoom = temp;
-							visualMap[x, z, f] = 'S';
+							RoomDetails(id, "entrance porch", coords, 4);
+							visualMap[x, z, f] = "Ep ";
 						} //start room
-						else if (end.Compair(x, z, end.f))
+						else if (end.Compair(x, z, f))
 						{
-							temp = (GameObject)Instantiate(Resources.Load("room"));
-							temp.name = "End Room";
-							room = temp.GetComponent<Room>();
-							RoomDetails(room, id, "end", x, z, f, 1);
-							visualMap[x, z, f] = 'E';
+							RoomDetails(id, "attic", coords, 10);
+							visualMap[x, z, f] = "At ";
 						} //end room
 						else if (stairs.Compair(x, z))
 						{
-							temp = (GameObject)Instantiate(Resources.Load("room"));
-							temp.name = "Stairwell";
-							room = temp.GetComponent<Room>();
-							RoomDetails(room, id, "stairs", x, z, f, 2);
-							visualMap[x, z, f] = 's';
+							RoomDetails(id, "stairs", coords, 13);
+							visualMap[x, z, f] = "Sr ";
 						}
 					} //make critical rooms
 					else
 					{
 						float roll = Random.Range(0f, 100f);
-						if (roll <= chance[0])
+						switch (floorType)
 						{
-							temp = (GameObject)Instantiate(Resources.Load("room"));
-							temp.name = "Room" + id;
-							room = temp.GetComponent<Room>();
-							RoomDetails(room, id, "room", x, z, f, -5);
-							visualMap[x, z, f] = 'r';
+							case "basement":
+								if (roll <= floorChance[0])
+								{
+									RoomDetails(id, "cellar", coords, 1);
+									visualMap[x, z, f] = "Cr ";
+								}
+								else if (roll > floorChance[0] && roll <= floorChance[1])
+								{
+									RoomDetails(id, "ritual room", coords, 2);
+									visualMap[x, z, f] = "Rr ";
+								}
+								else if (roll > floorChance[1] && roll <= floorChance[2])
+								{
+									RoomDetails(id, "living room", coords, 3);
+									visualMap[x, z, f] = "Lr ";
+								}
+								else if (roll > floorChance[2] && roll <= floorChance[3])
+								{
+									RoomDetails(id, "side corridor", coords, 11);
+									visualMap[x, z, f] = "Sc ";
+								}
+								else if (roll > floorChance[3] && roll <= floorChance[4])
+								{
+									RoomDetails(id, "bedroom", coords, 12);
+									visualMap[x, z, f] = "Br ";
+								}
+								break;
+							case "main":
+								if (roll <= floorChance[0])
+								{
+									RoomDetails(id, "living room", coords, 3);
+									visualMap[x, z, f] = "Lr ";
+								}
+								else if (roll > floorChance[0] && roll <= floorChance[1])
+								{
+									RoomDetails(id, "main hall", coords, 5);
+									visualMap[x, z, f] = "Mh ";
+								}
+								else if (roll > floorChance[1] && roll <= floorChance[2])
+								{
+									RoomDetails(id, "kitchen", coords, 6);
+									visualMap[x, z, f] = "Kt ";
+								}
+								else if (roll > floorChance[2] && roll <= floorChance[3])
+								{
+									RoomDetails(id, "parlor", coords, 7);
+									visualMap[x, z, f] = "Pl ";
+								}
+								else if (roll > floorChance[3] && roll <= floorChance[4])
+								{
+									RoomDetails(id, "side corridor", coords, 11);
+									visualMap[x, z, f] = "Sc ";
+								}
+								else if (roll > floorChance[4] && roll <= floorChance[5])
+								{
+									RoomDetails(id, "bedroom", coords, 12);
+									visualMap[x, z, f] = "Br ";
+								}
+								break;
+							case "upper":
+								if (roll <= floorChance[0])
+								{
+									RoomDetails(id, "parlor", coords, 7);
+									visualMap[x, z, f] = "Pl ";
+								}
+								else if (roll > floorChance[0] && roll <= floorChance[1])
+								{
+									RoomDetails(id, "balcony", coords, 8);
+									visualMap[x, z, f] = "Bl ";
+								}
+								else if (roll > floorChance[1] && roll <= floorChance[2])
+								{
+									RoomDetails(id, "study", coords, 9);
+									visualMap[x, z, f] = "St ";
+								}
+								else if (roll > floorChance[2] && roll <= floorChance[3])
+								{
+									RoomDetails(id, "side corridor", coords, 11);
+									visualMap[x, z, f] = "Sc ";
+								}
+								else if (roll > floorChance[3] && roll <= floorChance[4])
+								{
+									RoomDetails(id, "bedroom", coords, 12);
+									visualMap[x, z, f] = "Br ";
+								}
+								break;
 						}
 					} //make filler rooms
 
 					id++;
-					map[x, z, f] = temp;
+					map[x, z, f] = roomGen;
 				}
 			}
 
 			if (floorType == "basement")
+			{
 				floorType = "main";
+				floorChance = new float[6] { 20f, 40f, 60f, 80f, 90f, 100f };
+			}
 			else if (floorType == "main")
-				floorType = "Upper";
+			{
+				floorType = "upper";
+				floorChance = new float[5] { 20f, 40f, 60f, 80f, 100f };
+			}
 		}
 	}
 
-	public void RoomDetails(Room room, int id, string name, int x, int z, int f, int type)
+	public void RoomDetails(int id, string name, Coords coords, int type)
 	{
+		roomGen = (GameObject)Instantiate(Resources.Load("room"));
+		roomGen.name = name + " " + id;
+		Room room = roomGen.GetComponent<Room>();
 		room.ID = id;
-		room.coords.Set(x, z, f);
+		room.coords = coords;
 		room.roomName = name;
 		room.description = GenerateDescription(type);
 
-		if (x == distanceX - 1)
+		if (type == 4)
+		{
+			currentRoom = roomGen;
+			Debug.Log("Start room assigned");
+		}
+
+		if (coords.x == distanceX - 1)
 			room.exits[0] = false;
-		else if (x == 0)
+		else if (coords.x == 0)
 			room.exits[1] = false;
 
-		if (z == distanceZ - 1)
+		if (coords.z == distanceZ - 1)
 			room.exits[2] = false;
-		else if (z == 0)
+		else if (coords.z == 0)
 			room.exits[3] = false;
 
 		for (int i = 0; i < 4; i++)
@@ -264,11 +352,11 @@ public class Manager : MonoBehaviour
 
 	public string GenerateDescription(int roomType)
 	{
-		if (roomType == 0)
+		if (roomType == 4)
 			return "This is the start, go find the end.";
-		else if (roomType == 1)
+		else if (roomType == 10)
 			return "This is it, you found the end.";
-		else if (roomType == 2)
+		else if (roomType == 13)
 			return "This is a stairwell.";
 		else if (roomType == -1)
 			return "It's a door ";

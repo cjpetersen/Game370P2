@@ -403,7 +403,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   distanceX: 3
   distanceZ: 3
-  floors: 2
+  floors: 3
   output: {fileID: 293844481}
   actions:
   - go
