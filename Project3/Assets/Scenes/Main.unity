@@ -489,7 +489,7 @@ MonoBehaviour:
   - map
   - get
   - drop
-  - inventory
+  - inv
   logToOutput:
   - 'Controls: Go [direction], examine, examine [item], map, get [item],'
   - drop [item]. inventory

@@ -41,11 +41,18 @@ public class Manager : MonoBehaviour
 	{
 		string logAsText = string.Join("\n", logToOutput.ToArray());
 		output.text = logAsText;
-		Debug.Log(currentRoom.GetComponent<Room>().coords.x + " | " + currentRoom.GetComponent<Room>().coords.z + " | " + currentRoom.GetComponent<Room>().coords.f);
+		//Debug.Log(currentRoom.GetComponent<Room>().coords.x + " | " + currentRoom.GetComponent<Room>().coords.z + " | " + currentRoom.GetComponent<Room>().coords.f);
 	}
 
 	public void TakeAction(List<string> input)
 	{
+		string og = "";
+		for(int i = 0; i < input.Count; i++)
+		{
+			og += input[i] + " ";
+		}
+		AddToLog(og);
+		DisplayLoggedText();
 		switch (input[0])
 		{
 			case "go":
@@ -109,7 +116,7 @@ public class Manager : MonoBehaviour
 					}
 				}
 				break;
-			case "inventory":
+			case "inv":
 				string outputText = "Your inventory contains ";
 				for (int i = 0; i < inventory.Count; i++)
 				{
@@ -118,6 +125,8 @@ public class Manager : MonoBehaviour
 					else
 						outputText += "and " + inventory[i] + ".";
 				}
+				AddToLog(outputText);
+				DisplayLoggedText();
 				break;
 			default:
 				AddToLog("I don't understand that.");
@@ -384,7 +393,10 @@ public class Manager : MonoBehaviour
 		if (type == 4)
 		{
 			currentRoom = roomGen;
+			items = room.items;
 			Debug.Log("Start room assigned");
+			room.items.Add(itemGen[17]);
+			room.items.Add(itemGen[16]);
 		}
 
 		if (coords.x == distanceX - 1)
