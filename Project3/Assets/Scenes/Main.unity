@@ -409,68 +409,90 @@ MonoBehaviour:
   - name: Bookcase
     description: It's a bookcase
     allowedRooms: 09000000030000000c000000
+    moveable: 0
   - name: Bed
     description: It's a bed
     allowedRooms: 0c000000
+    moveable: 0
   - name: Chair
     description: It's a chair
     allowedRooms: 03000000060000000c000000
+    moveable: 1
   - name: Vase
     description: It's a vase
     allowedRooms: 0c0000000b000000
+    moveable: 1
   - name: Table
     description: It's a table
     allowedRooms: 0300000006000000
+    moveable: 0
   - name: Fireplace
     description: It's a fireplace
     allowedRooms: 03000000
+    moveable: 0
   - name: Coffin
     description: It's a coffin
     allowedRooms: 02000000
+    moveable: 0
   - name: Pentagram
     description: It's a pentagram
     allowedRooms: 02000000
+    moveable: 0
   - name: Candle
     description: It's a candle
     allowedRooms: 060000000c0000000b00000003000000
+    moveable: 1
   - name: Statue
     description: It's a statue
     allowedRooms: 030000000b00000009000000
+    moveable: 0
   - name: Dresser
     description: It's a dresser
     allowedRooms: 0c000000
+    moveable: 0
   - name: Closet
     description: It's a closet
     allowedRooms: 0c00000009000000
+    moveable: 0
   - name: Chest
     description: It's a chest
     allowedRooms: 0100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c000000
+    moveable: 0
   - name: Sink
     description: It's a sink
     allowedRooms: 06000000
+    moveable: 0
   - name: Stove
     description: It's a stove
     allowedRooms: 06000000
+    moveable: 0
   - name: Fridge
     description: It's a fridge
     allowedRooms: 06000000
+    moveable: 0
   - name: Mirror
     description: It's a mirror
     allowedRooms: 0100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c000000
+    moveable: 0
   - name: End table
     description: It's an end table
     allowedRooms: 030000000b0000000c000000
+    moveable: 0
   - name: Key
     description: It's a key
     allowedRooms: 0100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c000000
+    moveable: 1
   output: {fileID: 293844481}
   actions:
   - go
   - examine
   - map
   - get
+  - drop
+  - inventory
   logToOutput:
-  - 'Controls: Go [direction], examine, examine [object], map, get [object]'
+  - 'Controls: Go [direction], examine, examine [item], map, get [item],'
+  - drop [item]. inventory
   - 
   currentRoom: {fileID: 0}
   inventory: []

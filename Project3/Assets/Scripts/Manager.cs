@@ -70,6 +70,55 @@ public class Manager : MonoBehaviour
 			case "map":
 				DisplayMap(currentRoom.GetComponent<Room>().coords.f);
 				break;
+			case "get":
+				for (int i = 0; i < items.Count; i++)
+				{
+					if(items[i].name == input[1])
+					{
+						if (items[i].moveable)
+						{
+							inventory.Add(items[i]);
+							items.RemoveAt(i);
+						}
+						else
+						{
+							AddToLog("You can't move that.");
+							DisplayLoggedText();
+						}
+					}
+					else
+					{
+						AddToLog("There is no such item here.");
+						DisplayLoggedText();
+					}
+				}
+				break;
+			case "drop":
+				for (int i = 0; i < inventory.Count; i++)
+				{
+					if(inventory[i].name == input[1])
+					{
+						items.Add(inventory[i]);
+						currentRoom.GetComponent<Room>().items.Add(inventory[i]);
+						inventory.RemoveAt(i);
+					}
+					else
+					{
+						AddToLog("You don't have any such item");
+						DisplayLoggedText();
+					}
+				}
+				break;
+			case "inventory":
+				string outputText = "Your inventory contains ";
+				for (int i = 0; i < inventory.Count; i++)
+				{
+					if (i != inventory.Count - 1)
+						outputText += inventory[i] + ", ";
+					else
+						outputText += "and " + inventory[i] + ".";
+				}
+				break;
 			default:
 				AddToLog("I don't understand that.");
 				break;
