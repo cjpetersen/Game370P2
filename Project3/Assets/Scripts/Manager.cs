@@ -46,31 +46,44 @@ public class Manager : MonoBehaviour
 
 	public void TakeAction(List<string> input)
 	{
-		string og = "";
-		for(int i = 0; i < input.Count; i++)
-		{
-			og += input[i] + " ";
-		}
-		AddToLog(og);
-		DisplayLoggedText();
+		bool found = false;
+
 		switch (input[0])
 		{
 			case "go":
 				AttemptToChangeRooms(input[1]);
 				break;
 			case "examine":
+				found = false;
 				if (input.Count == 1 || input[1] == "room")
 					DisplayRoomText();
 				else
 				{
 					for (int i = 0; i < items.Count; i++)
 					{
-						if (input[1] == items[i].name)
+						if (input[1] == items[i].name.ToLower())
 						{
 							AddToLog(items[i].description);
 							DisplayLoggedText();
 							i = items.Count;
+							found = true;
 						}
+					}
+					for (int i = 0; i < inventory.Count; i++)
+					{
+						if (input[1] == inventory[i].name.ToLower())
+						{
+							AddToLog(inventory[i].description);
+							DisplayLoggedText();
+							i = items.Count;
+							found = true;
+						}
+					}
+
+					if (!found)
+					{
+						AddToLog("No such item exists.");
+						DisplayLoggedText();
 					}
 				}
 				break;
@@ -78,13 +91,17 @@ public class Manager : MonoBehaviour
 				DisplayMap(currentRoom.GetComponent<Room>().coords.f);
 				break;
 			case "get":
+				found = false;
 				for (int i = 0; i < items.Count; i++)
 				{
-					if(items[i].name == input[1])
+					if(items[i].name.ToLower() == input[1])
 					{
+						found = true;
 						if (items[i].moveable)
 						{
 							inventory.Add(items[i]);
+							AddToLog(items[i].name + " aquired");
+							DisplayLoggedText();
 							items.RemoveAt(i);
 						}
 						else
@@ -93,38 +110,49 @@ public class Manager : MonoBehaviour
 							DisplayLoggedText();
 						}
 					}
-					else
-					{
-						AddToLog("There is no such item here.");
-						DisplayLoggedText();
-					}
+				}
+
+				if(!found)
+				{
+					AddToLog("There is no such item here.");
+					DisplayLoggedText();
 				}
 				break;
 			case "drop":
+				found = false;
 				for (int i = 0; i < inventory.Count; i++)
 				{
-					if(inventory[i].name == input[1])
+					if(inventory[i].name.ToLower() == input[1])
 					{
-						items.Add(inventory[i]);
+						found = true;
+						//items.Add(inventory[i]);
 						currentRoom.GetComponent<Room>().items.Add(inventory[i]);
+						AddToLog(inventory[i].name + " dropped");
+						DisplayLoggedText();
 						inventory.RemoveAt(i);
 					}
-					else
-					{
-						AddToLog("You don't have any such item");
-						DisplayLoggedText();
-					}
+				}
+
+				if(!found)
+				{
+					AddToLog("You don't have any such item");
+					DisplayLoggedText();
 				}
 				break;
 			case "inv":
 				string outputText = "Your inventory contains ";
-				for (int i = 0; i < inventory.Count; i++)
+				if (inventory.Count != 0)
 				{
-					if (i != inventory.Count - 1)
-						outputText += inventory[i] + ", ";
-					else
-						outputText += "and " + inventory[i] + ".";
+					for (int i = 0; i < inventory.Count; i++)
+					{
+						if (i != inventory.Count - 1 || inventory.Count == 1)
+							outputText += inventory[i].name + ", ";
+						else
+							outputText += "and " + inventory[i].name + ".";
+					}
 				}
+				else
+					outputText += "nothing.";
 				AddToLog(outputText);
 				DisplayLoggedText();
 				break;
@@ -189,7 +217,7 @@ public class Manager : MonoBehaviour
 			outputText += "The room contains ";
 			for (int i = 0; i < items.Count; i++)
 			{
-				if (i != items.Count - 1)
+				if (i != items.Count - 1 || items.Count == 1)
 					outputText += items[i].name + ", ";
 				else
 					outputText += "and " + items[i].name + ".\n";
@@ -395,8 +423,8 @@ public class Manager : MonoBehaviour
 			currentRoom = roomGen;
 			items = room.items;
 			Debug.Log("Start room assigned");
+			room.items.Add(itemGen[18]);
 			room.items.Add(itemGen[17]);
-			room.items.Add(itemGen[16]);
 		}
 
 		if (coords.x == distanceX - 1)
