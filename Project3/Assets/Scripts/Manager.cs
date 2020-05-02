@@ -94,7 +94,7 @@ public class Manager : MonoBehaviour
 				found = false;
 				for (int i = 0; i < items.Count; i++)
 				{
-					if(items[i].name.ToLower() == input[1])
+					if (items[i].name.ToLower() == input[1])
 					{
 						found = true;
 						if (items[i].moveable)
@@ -112,7 +112,7 @@ public class Manager : MonoBehaviour
 					}
 				}
 
-				if(!found)
+				if (!found)
 				{
 					AddToLog("There is no such item here.");
 					DisplayLoggedText();
@@ -122,7 +122,7 @@ public class Manager : MonoBehaviour
 				found = false;
 				for (int i = 0; i < inventory.Count; i++)
 				{
-					if(inventory[i].name.ToLower() == input[1])
+					if (inventory[i].name.ToLower() == input[1])
 					{
 						found = true;
 						//items.Add(inventory[i]);
@@ -133,7 +133,7 @@ public class Manager : MonoBehaviour
 					}
 				}
 
-				if(!found)
+				if (!found)
 				{
 					AddToLog("You don't have any such item");
 					DisplayLoggedText();
@@ -185,7 +185,7 @@ public class Manager : MonoBehaviour
 					nextRoom = map[room.coords.x, room.coords.z - 1, room.coords.f];
 				break;
 			case "up":
-				if(room.roomName == "stairs" && currentRoom.GetComponent<Room>().coords.f < floors)
+				if (room.roomName == "stairs" && currentRoom.GetComponent<Room>().coords.f < floors)
 					nextRoom = map[room.coords.x, room.coords.z, room.coords.f + 1];
 				break;
 			case "down":
@@ -224,7 +224,7 @@ public class Manager : MonoBehaviour
 			}
 		}
 
-		for(int i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 		{
 			if (currentRoom.GetComponent<Room>().exitDescs[i] != "")
 				outputText += "There is " + currentRoom.GetComponent<Room>().exitDescs[i].ToLower() + "\n";
@@ -236,9 +236,9 @@ public class Manager : MonoBehaviour
 	public void DisplayMap(int floor)
 	{
 		string mapRow = "";
-		for(int i = distanceX - 1; i >= 0; i--)
+		for (int i = distanceX - 1; i >= 0; i--)
 		{
-			for(int j = 0; j < distanceZ; j++)
+			for (int j = 0; j < distanceZ; j++)
 			{
 				mapRow += visualMap[i, j, floor];
 			}
@@ -445,7 +445,7 @@ public class Manager : MonoBehaviour
 	public void GenerateItems(Room room)
 	{
 		int amount = Random.Range(0, 5);
-		for(int i = 0; i < amount; i++)
+		for (int i = 0; i < amount; i++)
 		{
 			int item = Random.Range(0, itemGen.Count);
 			if (itemGen[item].allowedRooms.Contains(room.type))
@@ -478,6 +478,22 @@ public class Manager : MonoBehaviour
 
 	public string GenerateDescription(int roomType)
 	{
+
+		string[] randomAdj = new string[10]
+		{
+			"creaky",
+			"creepy",
+			"old",
+			"broken",
+			"wooden",
+			"metal",
+			"large",
+			"demonic looking",
+			"rotten",
+			"red",
+		};
+		string randomArrayString = randomAdj[Random.Range(0, randomAdj.Length)];
+
 		if (roomType == 1)
 			return "You walk into a cold cellar with wet floors that reek of a putrid stench";
 		else if (roomType == 2)
@@ -506,7 +522,7 @@ public class Manager : MonoBehaviour
 		else if (roomType == 13)
 			return "You are now standing in a stairwell with stairs going up and down.\nNot knowing what lies ahead in either direction makes you a little nervous.";
 		else if (roomType == -1)
-			return "a door ";
+			return "a " + randomArrayString + " door ";
 		else
 			return "This is a generic room.";
 	}
