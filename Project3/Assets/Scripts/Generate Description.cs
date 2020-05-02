@@ -17,7 +17,7 @@ public class GenerateDescription : MonoBehaviour
     }
 
 
-	public string GenerateDescription(int roomType)
+	/*public string GenerateDescription(int roomType)
 	{
 		if (roomType == 1)
 			return "You walk into a cold cellar with wet floors that reek of a putrid stench";
@@ -50,5 +50,5 @@ public class GenerateDescription : MonoBehaviour
 			return "a door ";
 		else
 			return "This is a generic room.";
-	}
+	}*/
 }
