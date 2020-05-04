@@ -9,6 +9,9 @@ public class Item
 	public string description;
 	public List<int> allowedRooms;
 	public bool moveable;
+	public bool container;
+	public bool open;
+	public List<Item> inv;
 
 	public Item() { }
 	public Item(string name, string desc)

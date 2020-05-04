@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -64,9 +65,19 @@ public class Manager : MonoBehaviour
 						if (input[1] == items[i].name.ToLower())
 						{
 							AddToLog(items[i].description);
-							DisplayLoggedText();
 							i = items.Count;
 							found = true;
+						}
+						else if (items[i].container && items[i].open)
+						{
+							for (int j = 0; j < items[i].inv.Count; j++)
+							{
+								if (items[i].inv[j].name.ToLower() == input[1])
+								{
+									found = true;
+									AddToLog(items[i].inv[j].description);
+								}
+							}
 						}
 					}
 					for (int i = 0; i < inventory.Count; i++)
@@ -74,17 +85,13 @@ public class Manager : MonoBehaviour
 						if (input[1] == inventory[i].name.ToLower())
 						{
 							AddToLog(inventory[i].description);
-							DisplayLoggedText();
 							i = items.Count;
 							found = true;
 						}
 					}
 
 					if (!found)
-					{
 						AddToLog("No such item exists.");
-						DisplayLoggedText();
-					}
 				}
 				break;
 			case "map":
@@ -101,22 +108,33 @@ public class Manager : MonoBehaviour
 						{
 							inventory.Add(items[i]);
 							AddToLog(items[i].name + " aquired");
-							DisplayLoggedText();
 							items.RemoveAt(i);
 						}
 						else
-						{
 							AddToLog("You can't move that.");
-							DisplayLoggedText();
+					}
+					else if(items[i].container && items[i].open)
+					{
+						for(int j = 0; j < items[i].inv.Count; j++)
+						{
+							if(items[i].inv[j].name.ToLower() == input[1])
+							{
+								found = true;
+								if (items[i].moveable)
+								{
+									inventory.Add(items[i]);
+									AddToLog(items[i].name + " aquired");
+									items.RemoveAt(i);
+								}
+								else
+									AddToLog("You can't move that.");
+							}
 						}
 					}
 				}
 
 				if (!found)
-				{
 					AddToLog("There is no such item here.");
-					DisplayLoggedText();
-				}
 				break;
 			case "drop":
 				found = false;
@@ -128,16 +146,13 @@ public class Manager : MonoBehaviour
 						//items.Add(inventory[i]);
 						currentRoom.GetComponent<Room>().items.Add(inventory[i]);
 						AddToLog(inventory[i].name + " dropped");
-						DisplayLoggedText();
 						inventory.RemoveAt(i);
 					}
 				}
 
 				if (!found)
-				{
 					AddToLog("You don't have any such item");
 					DisplayLoggedText();
-				}
 				break;
 			case "inv":
 				string outputText = "Your inventory contains ";
@@ -154,12 +169,63 @@ public class Manager : MonoBehaviour
 				else
 					outputText += "nothing.";
 				AddToLog(outputText);
-				DisplayLoggedText();
+				break;
+			case "open":
+				found = false;
+				for(int i = 0; i < items.Count; i++)
+				{
+					if(items[i].name.ToLower() == input[1])
+					{
+						found = true;
+						if (items[i].container)
+						{
+							if (!items[i].open)
+							{
+								items[i].open = true;
+								AddToLog("You open the " + items[i].name.ToLower());
+							}
+							else
+								AddToLog("That container is already open.");
+						}
+						else
+							AddToLog("That isn't a container");
+					}
+				}
+				
+				if (!found)
+					AddToLog("There is no such container here.");
+				break;
+			case "close":
+				found = false;
+				for(int i = 0; i < items.Count; i++)
+				{
+					if (items[i].name.ToLower() == input[1])
+					{
+						found = true;
+						if (items[i].container)
+						{
+							if (items[i].open)
+							{
+								items[i].open = false;
+								AddToLog("You close the " + items[i].name.ToLower());
+							}
+							else
+								AddToLog("That container is already closed.");
+						}
+						else
+							AddToLog("That isn't a container");
+					}
+				}
+
+				if (!found)
+					AddToLog("There is no such container here.");
 				break;
 			default:
 				AddToLog("I don't understand that.");
 				break;
 		}
+
+		DisplayLoggedText();
 	}
 
 	public void AttemptToChangeRooms(string direction)
@@ -209,7 +275,7 @@ public class Manager : MonoBehaviour
 
 	public void DisplayRoomText()
 	{
-		string outputText = currentRoom.GetComponent<Room>().roomName + "\n";
+		string outputText = currentRoom.GetComponent<Room>().roomName.ToUpper() + "\n";
 		outputText += currentRoom.GetComponent<Room>().description + "\n";
 
 		if (items.Count > 0)
@@ -221,6 +287,22 @@ public class Manager : MonoBehaviour
 					outputText += items[i].name + ", ";
 				else
 					outputText += "and " + items[i].name + ".\n";
+			}
+
+			for (int i = 0; i < items.Count; i++)
+			{
+				if(items[i].container && items[i].open)
+				{
+					outputText += "There is a ";
+					for(int j = 0; j < items[i].inv.Count; j++)
+					{
+						if (j != items[i].inv.Count || items[i].inv.Count == 1)
+							outputText += items[i].inv[j].name + ", ";
+						else
+							outputText += "and " + items[i].inv[j].name;
+					}
+					outputText += " in the " + items[i].name + ".\n";
+				}
 			}
 		}
 
@@ -416,16 +498,15 @@ public class Manager : MonoBehaviour
 		room.coords = coords;
 		room.roomName = name;
 		room.description = GenerateDescription(type);
-		GenerateItems(room);
 
 		if (type == 4)
 		{
 			currentRoom = roomGen;
 			items = room.items;
-			Debug.Log("Start room assigned");
-			room.items.Add(itemGen[18]);
-			room.items.Add(itemGen[17]);
+			room.items.Add(itemGen[0]);
+			room.items[0].inv.Add(itemGen[18]);
 		}
+		GenerateItems(room, room.items);
 
 		if (coords.x == distanceX - 1)
 			room.exits[0] = false;
@@ -442,14 +523,19 @@ public class Manager : MonoBehaviour
 				GenerateExit(room, i);
 	}
 
-	public void GenerateItems(Room room)
+	public void GenerateItems(Room room, List<Item> items)
 	{
-		int amount = Random.Range(0, 5);
+		int amount = Random.Range(0, 2);
 		for (int i = 0; i < amount; i++)
 		{
 			int item = Random.Range(0, itemGen.Count);
 			if (itemGen[item].allowedRooms.Contains(room.type))
-				room.items.Add(itemGen[item]);
+				items.Add(itemGen[item]);
+			else
+				i--;
+
+			if (items[i].container)
+				GenerateItems(room, room.items[i].inv);
 		}
 	}
 
