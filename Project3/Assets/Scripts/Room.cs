@@ -10,7 +10,6 @@ public class Room : MonoBehaviour
 	public string roomName;
 	public Coords coords;
 	public string[] exitDescs = new string[4] { "", "", "", "" };
-	//public bool[] exits = new bool[4] { false, false, false, false };
 	public bool[] exits = new bool[4] { true, true, true, true };
 	public List<Item> items;
 }

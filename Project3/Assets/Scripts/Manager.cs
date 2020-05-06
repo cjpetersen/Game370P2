@@ -525,6 +525,7 @@ public class Manager : MonoBehaviour
 
 	public void GenerateItems(Room room, List<Item> items)
 	{
+		int giveup = 0;
 		int amount = Random.Range(0, 2);
 		for (int i = 0; i < amount; i++)
 		{
@@ -532,9 +533,15 @@ public class Manager : MonoBehaviour
 			if (itemGen[item].allowedRooms.Contains(room.type))
 				items.Add(itemGen[item]);
 			else
+			{
 				i--;
+				giveup++;
+			}
 
-			if (items[i].container)
+			if (giveup == 10)
+				i = amount;
+
+			if (items.Count > 0 && items[i].inv.Count == 0 && items[i].container)
 				GenerateItems(room, room.items[i].inv);
 		}
 	}
